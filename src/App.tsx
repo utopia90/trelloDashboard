@@ -4,62 +4,45 @@ import { BackgroundContext } from "./contexts/backgroundContext";
 import { ThemeContext } from "./contexts/themeContext";
 import Routes from "./routes/routes";
 import { StyledBody } from "./shared/body";
+import { FiSun,FiCloud,FiCloudDrizzle } from "react-icons/fi";
+import { WiDayCloudy,WiHail } from "react-icons/wi";
+import { FaTemperatureHigh,FaTemperatureLow
+} from "react-icons/fa";
+
+
+
 import {
   BackgroundSelect,
   ButtonsDiv,
   OptionStyled,
   SwitchThemeBtn,
 } from "./shared/button";
-import sea from "./assets/imgs/sea.jpg";
-import mountains from "./assets/imgs/mountains.jpg";
-import sky from "./assets/imgs/sky.jpg";
-import sand from "./assets/imgs/sand.jpg";
+
 import { TopAppDiv, WeatherDiv } from "./shared/form";
-import axios from "axios";
 import { convertFahrenheitToCelsius } from "./App.mapper";
+import { WeatherP, WeatherSpan } from "./shared/titles";
+import { weatherRespository } from "./repositories/weatherRespository";
+import { weatherDTO } from "./dto/weatherDTO";
+import { optionObject, SwitchBackground } from "./appUtils";
 
 const App: React.FC = () => {
   const { dark, toggleDark } = React.useContext(ThemeContext);
-  const [weatherData, setWeatherData] = useState<any>([]);
-  const [isLoading, setLoading] = useState(true);
-
   const { backgroundChoice, changeBackground } =
     React.useContext(BackgroundContext);
-  const baseURL = `http://dataservice.accuweather.com/forecasts/v1/daily/1day/3352966?apikey=KaKGCvrADsAhbyPeQQNx3oJXflSGHUYe&language=en`;
+  const [weatherData, setWeatherData] = useState<weatherDTO>();
 
-  const switchBackground = () => {
-    switch (backgroundChoice) {
-      case "sea":
-        return sea;
-
-      case "sky":
-        return sky;
-
-      case "mountains":
-        return mountains;
-
-      case "sand":
-        return sand;
-
-      default:
-        return "";
-    }
-  };
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(baseURL);
-        setWeatherData(response?.data);
-        setLoading(false)
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-  }, []);
+    weatherRespository.getWeatherData().then((res) => {
+      setWeatherData(res);
+    });
+  }, [{}]);
+
   return (
     <div>
-      <StyledBody color={dark ? "black" : "white"} theme={switchBackground()}>
+      <StyledBody
+        color={dark ? "black" : "lightgray"}
+        theme={SwitchBackground()}
+      >
         <TopAppDiv>
           <ButtonsDiv>
             {backgroundChoice === "any" && (
@@ -70,35 +53,48 @@ const App: React.FC = () => {
               id="background"
               name="backgroundList"
             >
-              <OptionStyled value="sea">Background Sea</OptionStyled>
-              <OptionStyled value="mountains">
-                Background Mountains
-              </OptionStyled>
-              <OptionStyled value="sky">Background Sky</OptionStyled>
-              <OptionStyled value="sand">Background Sand</OptionStyled>
-              <OptionStyled value="any">
-                No Background / Toggle Theme
-              </OptionStyled>
+              {optionObject.map((option, idx) => {
+                return (
+                  <OptionStyled key={idx} value={option.value}>
+                    {option.text}
+                  </OptionStyled>
+                );
+              })}
             </BackgroundSelect>
           </ButtonsDiv>
-          <WeatherDiv>
-            <h3>Good Morning!</h3>
-            <h4>
-              Málaga is today: {!isLoading  && weatherData.DailyForecasts[0].Day.IconPhrase}
-            </h4>
-            <h4>
-              We
-              {!isLoading && weatherData.DailyForecasts[0].Day.HasPrecipitation === false &&
-                " dont "}
-              expect precipitations
-            </h4>
-            <h4>Maximum temperature is: {!isLoading && convertFahrenheitToCelsius(weatherData.DailyForecasts[0].Temperature.Maximum.Value)} ºC</h4>
-            <h4>Minumum temperature is: {!isLoading && convertFahrenheitToCelsius(weatherData.DailyForecasts[0].Temperature.Minimum.Value)} ºC</h4>
 
+          <WeatherDiv>
+           <p> <FiSun/>  Good Morning!</p>
+            <p>Málaga is today:</p>  
+                {weatherData?.DailyForecasts[0].Day.IconPhrase.includes("Partly") || weatherData?.DailyForecasts[0].Day.IconPhrase.includes("clouds") ? <WeatherP><WeatherSpan> {weatherData?.DailyForecasts[0].Day.IconPhrase} </WeatherSpan> <WiDayCloudy/> </WeatherP>: <WeatherP> <WeatherSpan>  {weatherData?.DailyForecasts[0].Day.IconPhrase}</WeatherSpan><FiSun/></WeatherP>  }
+             <p>We
+              <WeatherSpan>
+                {weatherData?.DailyForecasts[0].Day.HasPrecipitation ===
+                  false && " dont "}
+              </WeatherSpan>
+              expect precipitations  <WiHail style={{fontSize:"21px"}}/> </p> 
+            <p>
+              Maximum temperature is:  
+              <WeatherSpan>
+                {convertFahrenheitToCelsius(
+                  weatherData?.DailyForecasts[0].Temperature.Maximum.Value
+                )}
+                ºC  <FaTemperatureHigh/>
+              </WeatherSpan>
+              </p>
+            <p>
+              Minumum temperature is:
+              <WeatherSpan>
+                {convertFahrenheitToCelsius(
+                  weatherData?.DailyForecasts[0].Temperature.Minimum.Value
+                )}
+                ºC  <FaTemperatureLow/>
+              </WeatherSpan>
+            </p>
           </WeatherDiv>
         </TopAppDiv>
         <Routes />
-      </StyledBody>
+       </StyledBody>
     </div>
   );
 };

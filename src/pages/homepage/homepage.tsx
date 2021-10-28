@@ -1,6 +1,10 @@
 /* eslint-disable no-useless-computed-key */
+/* eslint-disable no-useless-computed-key */
 import React, { useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { BrowserRouter, Link, useHistory } from "react-router-dom";
+import {FaEdit, FaTimes} from 'react-icons/fa';
+
 import {
   AddTaskBtn,
   AddTaskInput,
@@ -15,47 +19,54 @@ import {
   DraggableStyledDiv,
   DropableStyledDiv,
   HomeDivStyled,
+  ProgressBar,
+  ProgressDiv,
+  TestDiv,
   TopMenuDiv,
 } from "../../shared/form";
-import { H1Styled, H3Styled } from "../../shared/titles";
+import { H1Styled, H3Styled, WeatherSpan } from "../../shared/titles";
 import { TaskCounterContext } from "../../contexts/taskCounterContext";
-import ReactDOM from "react-dom";
+import ReactDOM, { render } from "react-dom";
 import HomePageModal from "./homepageModal";
 import {
   itemsFromBackend,
   columnsFromBackend,
   onDragEnd,
+  switchProgressStyle,
 } from "./homepageUtils";
 
 const Homepage: React.FC = () => {
-  const [columns, setColumns] = useState(columnsFromBackend);
+   const [columns, setColumns] = useState(columnsFromBackend);
 
-  const [items, setItems] = useState(itemsFromBackend);
-  const [showModal, setShowModal] = useState(false);
+   const [items, setItems] = useState(itemsFromBackend);
+   const [showModal, setShowModal] = useState(false);
 
-  const [taskName, setTaskName] = useState("");
-  const [taskDescription, setTaskDescription] = useState("");
+   const [taskName, setTaskName] = useState("");
+   const [taskDescription, setTaskDescription] = useState(""); 
 
-  let lastIndex = Object.keys(items).length;
-  const [editIndex, setEditIndex] = useState(0);
+   let lastIndex = Object.keys(items).length;
+   const [editIndex, setEditIndex] = useState(0);
 
-  const { counter, increment, decrement } =
+   const { counter, increment, decrement } =
     React.useContext(TaskCounterContext);
 
-  const [taskEdited, setTaskEdited] = useState(false);
+   const [taskEdited, setTaskEdited] = useState(false);
 
-  const newTaskToAdd = {
+   const [progress, setProgress] = useState(0);
+
+   const newTaskToAdd = {
     id: (lastIndex + 1).toString(),
     content: taskName,
     description: taskDescription,
+    progress: 0,
     column: 1,
   };
-  const newColumns = {
+   const newColumns = {
     ...columns,
     [1]: { ...columns[1], items: [...columns[1].items, newTaskToAdd] },
   };
 
-  const addTask = () => {
+   const addTask =  () => {
     if (taskName.length > 0 && taskDescription.length > 0) {
       setItems([...items, newTaskToAdd]);
       setColumns(newColumns);
@@ -63,8 +74,8 @@ const Homepage: React.FC = () => {
       alert("please, add a name and description for the task");
     }
   };
-
-  const deleteTask = (id: number, columnId: number) => {
+    const test = () => {return 4}
+    const deleteTask = (id: number, columnId: number) => {
     columns[columnId].items.splice(id, 1);
 
     setColumns({
@@ -72,13 +83,18 @@ const Homepage: React.FC = () => {
       [columnId]: { ...columns[columnId], items: [...columns[columnId].items] },
     });
   };
-
-  const editThisTask = () => {
+  
+   const editThisTask = () => {
     let itemToEdit = items.filter((item) => item.id === editIndex.toString());
     let column = itemToEdit[0].column;
 
-    itemToEdit[0].content = taskName;
-    itemToEdit[0].description = taskDescription;
+    if (taskName.length > 0 && taskDescription.length > 0) {
+      itemToEdit[0].content = taskName;
+      itemToEdit[0].description = taskDescription;
+      itemToEdit[0].progress = progress;
+    } else {
+      alert("please, write name and description of task correctly");
+    }
 
     setColumns({
       ...columns,
@@ -92,7 +108,7 @@ const Homepage: React.FC = () => {
     setTaskName(e);
   };
 
-  const getDataTaskDescription = (e: string) => {
+   const getDataTaskDescription = (e: string) => {
     setTaskDescription(e);
   };
 
@@ -101,20 +117,26 @@ const Homepage: React.FC = () => {
     setShowModal(true);
     setEditIndex(id);
   };
+
   return (
     <div>
-      <H1Styled>TRELLO ORGANIZATION DASHBOARD</H1Styled>
+      <TestDiv>
+        <Link to="test">
+          Take the <WeatherSpan>productivity test</WeatherSpan>
+        </Link>
+      </TestDiv>
+      <H3Styled>TRELLO DASHBOARD</H3Styled>
       <TopMenuDiv>
         <AddTaskDiv>
-          <AddTaskInput
+          <AddTaskInput data-testid="addTask-name"
             placeholder="name of the task"
             onChange={(e) => setTaskName(e.target.value)}
           ></AddTaskInput>
-          <AddTaskInput
+          <AddTaskInput data-testid="addTask-description"
             placeholder="description of the task"
             onChange={(e) => setTaskDescription(e.target.value)}
           ></AddTaskInput>
-          <AddTaskBtn type="button" onClick={addTask}>
+          <AddTaskBtn type="button" onClick={addTask} role="add-task-btn" >
             +
           </AddTaskBtn>
         </AddTaskDiv>
@@ -135,7 +157,7 @@ const Homepage: React.FC = () => {
                           {...provided.droppableProps}
                           ref={provided.innerRef}
                           color={
-                            snapshot.isDraggingOver ? "lightgreen" : "lightgray"
+                            snapshot.isDraggingOver ? "lightgreen" : "#e4e4e4"
                           }
                         >
                           {column.items.map((item: any, index: number) => {
@@ -148,7 +170,7 @@ const Homepage: React.FC = () => {
                                 >
                                   {(provided, snapshot) => {
                                     return (
-                                      <DraggableStyledDiv
+                                      <DraggableStyledDiv  data-testid="dragable-div"
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}
@@ -160,23 +182,37 @@ const Homepage: React.FC = () => {
                                       >
                                         <h3>{item.content}</h3>
                                         <p>{item.description}</p>
+                                        {item.progress > 0 && (
+                                          <ProgressDiv>
+                                            <ProgressBar
+                                              property={switchProgressStyle(
+                                                item.progress.toFixed(2)
+                                              )}
+                                            >
+                                              {item.progress.toFixed(2)}%
+                                            </ProgressBar>
+                                          </ProgressDiv>
+                                        )}
                                         <EditBtnStyled
                                           onClick={() => showEditModal(item.id)}
                                         >
-                                          M
+                                          <FaEdit/>
                                         </EditBtnStyled>
-                                        <CloseBtnStyled
+                                        <CloseBtnStyled  title="delete-task-btn"
                                           onClick={() =>
                                             deleteTask(index, +columnId)
                                           }
                                         >
-                                          X
+                                          <FaTimes />
                                         </CloseBtnStyled>
 
                                         <div>
                                           {showModal &&
                                             ReactDOM.createPortal(
                                               <HomePageModal
+                                                sendProgressData={(progress) =>
+                                                  setProgress(progress)
+                                                }
                                                 taskEdited={taskEdited}
                                                 sendDataTaskName={
                                                   getDataTaskName
@@ -220,3 +256,7 @@ const Homepage: React.FC = () => {
   );
 };
 export default Homepage;
+
+export const getFunction = (value: any) => {
+  return value;
+};
