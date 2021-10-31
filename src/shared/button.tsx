@@ -11,6 +11,9 @@ export const RegisterButton = styled.button`
   margin: 0 auto;
   margin-top: 1rem;
   cursor: pointer;
+  width: 29rem;
+  border-radius: 19rem;
+  height: 2.6rem;
 
   :hover {
     background: white;

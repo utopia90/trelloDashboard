@@ -125,10 +125,7 @@ test("modal inputs work correctly", async () => {
   expect(sendDataTaskName).toHaveBeenCalledWith("name task edited");
   expect(setSubtask).toHaveBeenCalledWith("subtask test");
 
-  
-  // const value = getFunction(test)
 
-  // expect(value).toBe(4)
 });
 
 

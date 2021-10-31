@@ -68,10 +68,10 @@ export const TestGallery: React.FC<testI> = ({ test }) => {
   return (
     <div>
       <TestWrapper>
-        <h1>{counter <= 4 && test[counter].question}</h1>
+        <h1 data-testid="questions-div">{counter <= 4 && test[counter].question}</h1>
         {counter <= 4 &&
           test[counter].answers.map((txt) => (
-           <DivisorSpan id="testdiv"><AddTaskBtn onClick={() => handleCounter(txt)}>{txt}</AddTaskBtn></DivisorSpan> 
+           <DivisorSpan id="testdiv"><AddTaskBtn data-testid="test-btn" onClick={() => handleCounter(txt)}>{txt}</AddTaskBtn></DivisorSpan> 
           ))}
       </TestWrapper>
      

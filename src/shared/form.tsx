@@ -11,6 +11,9 @@ export const HomeDivStyled = styled.div`
   justify-content: center;
   height: "100%";
 `;
+export const Errors = styled.p`
+  color:red;
+`;
 
 export const ColumnStyledDiv = styled.div`
   display: "flex";
@@ -91,8 +94,8 @@ export const TestDiv = styled.div`
 }
 `;
 const progressStyles = {
-  starting: { color: "red", width: "4rem" },
-  medium: { color: "yellow", width: "6rem" },
+  starting: { color: "red", width: "3rem" },
+  medium: { color: "yellow", width: "5rem" },
   advanced: { color: "lightgreen", width: "8rem" },
   done: { color: "lightpink", width: "10rem" }
 };

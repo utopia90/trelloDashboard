@@ -31,11 +31,11 @@ const App: React.FC = () => {
     React.useContext(BackgroundContext);
   const [weatherData, setWeatherData] = useState<weatherDTO>();
 
-  useEffect(() => {
-    weatherRespository.getWeatherData().then((res) => {
-      setWeatherData(res);
-    });
-  }, [{}]);
+  // useEffect(() => {
+  //   weatherRespository.getWeatherData().then((res) => {
+  //     setWeatherData(res);
+  //   });
+  // }, [{}]);
 
   return (
     <div>
@@ -63,7 +63,7 @@ const App: React.FC = () => {
             </BackgroundSelect>
           </ButtonsDiv>
 
-          <WeatherDiv>
+          {/* <WeatherDiv>
            <p> <FiSun/>  Good Morning!</p>
             <p>Málaga is today:</p>  
                 {weatherData?.DailyForecasts[0].Day.IconPhrase.includes("Partly") || weatherData?.DailyForecasts[0].Day.IconPhrase.includes("clouds") ? <WeatherP><WeatherSpan> {weatherData?.DailyForecasts[0].Day.IconPhrase} </WeatherSpan> <WiDayCloudy/> </WeatherP>: <WeatherP> <WeatherSpan>  {weatherData?.DailyForecasts[0].Day.IconPhrase}</WeatherSpan><FiSun/></WeatherP>  }
@@ -91,7 +91,7 @@ const App: React.FC = () => {
                 ºC  <FaTemperatureLow/>
               </WeatherSpan>
             </p>
-          </WeatherDiv>
+          </WeatherDiv> */}
         </TopAppDiv>
         <Routes />
        </StyledBody>
